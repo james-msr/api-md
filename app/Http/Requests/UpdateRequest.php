@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class DeviceRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,10 @@ class DeviceRequest extends FormRequest
     public function rules()
     {
         return [
-            'number' => 'required',
+            'value' => 'required',
             'type' => 'required',
-            'storage_address' => 'required'
+            'number' => 'required',
+            'date' => 'required'
         ];
     }
 }

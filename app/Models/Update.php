@@ -15,4 +15,9 @@ class Update extends Model
         'device_type',
         'measurement',
     ];
+
+    public function device()
+    {
+        return $this->belongsTo(Device::class, 'device_num', 'number');
+    }
 }

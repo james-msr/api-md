@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DeviceRequest;
+use App\Http\Requests\UpdateRequest;
+use App\Http\Resources\DeviceResource;
 use App\Models\Device;
 use App\Models\Update;
 use Illuminate\Http\Request;
@@ -12,53 +14,48 @@ class DeviceController extends Controller
 {
     public function index()
     {
-        $devices = Device::all();
-        return response()->json($devices);
+        return DeviceResource::collection(Device::all());
     }
 
-    public function store(Request $request)
+    public function store(DeviceRequest $request)
     {
-        $request->validate([
-            'number' => 'required',
-            'type' => 'required',
-            'storage_address' => 'required'
-        ]);
+        $validated = $request->validated();
 
         $newDevice = Device::query()->create([
-            'number' => $request->get('number'),
-            'type' => $request->get('type')
+            'number' => $validated['number'],
+            'type' => $validated['type'],
+            'storage_address' => $validated['storage_address']
         ]);
-        return response()->json($newDevice);
+        return new DeviceResource($newDevice);
     }
 
     public function show($id)
     {
-        $device = Device::query()->findOrFail($id);
-        return response()->json($device);
+
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateRequest $request)
     {
-        $device = Device::query()->findOrFail($id);
+        $validated = $request->validated();
 
-        $request->validate([
-            'value' => 'required'
-        ]);
-        $lastUpdate = $device->updates()->first();
-        if ($lastUpdate->value > $request->get('value') || $request->get('value') - $lastUpdate->value <= 99) {
-            return abort('302', 'Введенные показания не могут быть меньше предыдущих и не могут быть больше, чем на 99');
+        $device = Device::query()->findOrFail(['number' => $validated['number'], 'type' => $validated['type']]);
+
+        $lastUpdate = $device->updates()->latest();
+        if ($lastUpdate->date > $validated['data']) {
+            return abort('302', 'Введенная дата не может быть после даты последнего обновления.');
         }
-        $device->number = $request->get('number');
-        $device->type = $request->get('type');
-        $device->save();
-        $newUpdate = Update::query()->create([
+        if ($lastUpdate->value > $validated['value'] || $validated['value'] - $lastUpdate->value >= 99) {
+            return abort('302', 'Введенные показания не могут быть меньше предыдущих и не могут быть больше, чем на 99.');
+        }
+
+        Update::query()->create([
             'value' => $request->get('value'),
             'device_num' => $device->number,
             'device_type' => $device->type,
+            'measurement' => Device::MEASUREMENT[$device->type],
+            'date' => $request->get('date')
         ]);
-        $newUpdate->measurement = Device::MEASUREMENT[$device->type];
-        $newUpdate->save();
-        return response()->json($device);
+        return new DeviceResource($device);
     }
 
     public function destroy($id)

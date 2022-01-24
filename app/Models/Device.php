@@ -36,4 +36,9 @@ class Device extends Model
     {
         return $this->hasMany(Update::class, 'device_num', 'number');
     }
+
+    public function lastUpdate()
+    {
+        return $this->update()->latest();
+    }
 }

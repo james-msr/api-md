@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorageRequest;
+use App\Http\Resources\StorageResource;
 use App\Models\Storage;
 use Illuminate\Http\Request;
 
@@ -10,52 +12,34 @@ class StorageController extends Controller
 {
     public function index()
     {
-        $storages = Storage::all();
-        return response()->json($storages);
+        return StorageResource::collection(Storage::all());
     }
 
-    public function store(Request $request)
+    public function store(StorageRequest $request)
     {
-        $request->validate([
-            'address' => 'required',
-        ]);
+        $validated = $request->validated();
 
         $newStorage = Storage::query()->create([
-            'address' => $request->get('address'),
+            'address' => $validated['address'],
         ]);
-        $newStorage->save();
-        return response()->json($newStorage);
+        return new StorageResource($newStorage);
     }
 
-    public function show($id)
+    public function show($address)
     {
-        $storage = Storage::query()->findOrFail($id);
-        $storageItems = [];
-        foreach ($storage->devices() as $device) {
-            $deviceDetails = [
-                'number' => $device->number,
-                'type' => $device->type,
-                'last_value' => $device->updates()->first()->value,
-            ];
-            array_push($storageItems, $deviceDetails);
-        }
-        return response()->json($storageItems);
+        return new StorageResource(Storage::query()->findOrFail(['address' => $address]));
     }
 
     public function update(Request $request, $id)
     {
-        $storage = Storage::query()->findOrFail($id);
 
-        $storage->address = $request->get('address');
-        $storage->save();
-        return response()->json($storage);
     }
 
-    public function destroy($id)
+    public function destroy($address)
     {
-        $storage = Storage::query()->findOrFail($id);
+        $storage = Storage::query()->findOrFail(['address' => $address]);
         $storage->delete();
 
-        return response()->json($storage);
+        return new StorageResource($storage);
     }
 }
