@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Device;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StorageResource extends JsonResource
@@ -16,7 +17,7 @@ class StorageResource extends JsonResource
     {
         return [
             'address' => $this->address,
-            'devices' => DeviceResource::collection($this->devices->get())
+            'devices' => DeviceResource::collection(Device::query()->where('storage_address', '=', $this->address)->get())
         ];
     }
 }

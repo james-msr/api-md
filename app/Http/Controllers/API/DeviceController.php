@@ -21,12 +21,12 @@ class DeviceController extends Controller
     {
         $validated = $request->validated();
 
-        $newDevice = Device::query()->create([
+        Device::query()->create([
             'number' => $validated['number'],
             'type' => $validated['type'],
             'storage_address' => $validated['storage_address']
         ]);
-        return new DeviceResource($newDevice);
+        return 201;
     }
 
     public function show($id)
@@ -49,20 +49,17 @@ class DeviceController extends Controller
         }
 
         Update::query()->create([
-            'value' => $request->get('value'),
+            'value' => $validated['value'],
             'device_num' => $device->number,
             'device_type' => $device->type,
             'measurement' => Device::MEASUREMENT[$device->type],
-            'date' => $request->get('date')
+            'date' => $validated['date']
         ]);
         return new DeviceResource($device);
     }
 
-    public function destroy($id)
+    public function destroy($number)
     {
-        $device = Device::query()->findOrFail($id);
-        $device->delete();
 
-        return response()->json($device);
     }
 }

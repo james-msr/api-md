@@ -16,9 +16,9 @@ class Device extends Model
     ];
 
     public const MEASUREMENT = [
-        'electricity' => 'Кв*ч',
-        'cold_water' => 'куб.м',
-        'hot_water' => 'куб.м'
+        'Э/Э' => 'Кв*ч',
+        'ХВС' => 'куб.м',
+        'ГВС' => 'куб.м'
     ];
 
     protected $fillable = [
@@ -39,6 +39,9 @@ class Device extends Model
 
     public function lastUpdate()
     {
-        return $this->update()->latest();
+        return $this->updates()->latest()->get();
     }
+
+    public int $val;
+    public int $diff;
 }

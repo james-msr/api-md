@@ -20,7 +20,7 @@ class CreateUpdatesTable extends Migration
             $table->foreign('device_num')
                     ->references('number')
                     ->on('devices')
-                    ->nullOnDelete();
+                    ->cascadeOnDelete();
             $table->enum('device_type', array_values(\App\Models\Device::TYPE));
             $table->string('measurement');
             $table->date('date')->default(now());

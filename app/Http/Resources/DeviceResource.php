@@ -19,7 +19,7 @@ class DeviceResource extends JsonResource
             'number' => $this->number,
             'type' => $this->type,
             'storage_address' => $this->storage_address,
-            'last_value' => $this->last_update()->value
+            'last_value' => Update::query()->orderBy('date', 'desc')->where('device_num', '=', $this->number)->firstOrFail()->value,
         ];
     }
 }

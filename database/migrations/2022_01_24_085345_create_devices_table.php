@@ -21,7 +21,7 @@ class CreateDevicesTable extends Migration
             $table->foreign('storage_address')
                     ->references('address')
                     ->on('storages')
-                    ->nullOnDelete();
+                    ->cascadeOnDelete();
             $table->timestamps();
         });
     }
